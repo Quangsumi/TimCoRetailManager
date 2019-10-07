@@ -35,14 +35,16 @@ namespace TRMDataManager.App_Start
                             type = "string",
                             name = "username",
                             required = false,
-                            @in = "formData"
+                            @in = "formData",
+                            @default = "tim@iamtimcorey.com"
                         },
                         new Parameter
                         {
                             type = "string",
                             name = "password",
                             required = false,
-                            @in = "formData"
+                            @in = "formData",
+                            @default = "Pwd12345."
                         }
                     }
                 }
