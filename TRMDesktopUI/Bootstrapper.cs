@@ -11,6 +11,8 @@ using TRMDesktopUI.ViewModels;
 using TRMDesktopUI.Library.Api;
 using TRMDesktopUI.Library.Models;
 using TRMDesktopUI.Library.Helpers;
+using AutoMapper;
+using TRMDesktopUI.Models;
 
 namespace TRMDesktopUI
 {
@@ -28,8 +30,23 @@ namespace TRMDesktopUI
             "PasswordChanged");
         }
 
+        private static IMapper ConfigureAutomapper()
+        {
+            var config = new MapperConfiguration(cfg =>
+            {
+                cfg.CreateMap<ProductModel, ProductDisplayModel>();
+                cfg.CreateMap<CartItemModel, CartItemDisplayModel>();
+            });
+
+            var mapper = config.CreateMapper();
+
+            return mapper;
+        }
+
         protected override void Configure()
         {
+            _container.Instance(ConfigureAutomapper());
+
             _container.Instance(_container)
                 .PerRequest<IProductEndpoint, ProductEndpoint>()
                 .PerRequest<ISaleEndPoint, SaleEndPoint>();
