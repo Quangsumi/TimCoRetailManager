@@ -46,19 +46,33 @@ namespace TRMDataManager.Library.DataAccess
 
             saleDB.Total = saleDB.SubTotal + saleDB.Tax;
 
-            // Save the sale model
-            SqlDataAccess sql = new SqlDataAccess();
-            sql.SaveData<SaleDBModel>("dbo.spSale_Insert", saleDB, "TRMData");
-
-            // Get the ID from the detail model
-            saleDB.Id = sql.LoadData<int, dynamic>("dbo.spSale_Lookup", new { saleDB.CashierId, saleDB.SaleDate }, "TRMData").FirstOrDefault();
-
-            // Finish filling in the sale detai models
-            foreach (var item in details)
+            using(SqlDataAccess sql = new SqlDataAccess())
             {
-                item.SaleId = saleDB.Id;
-                // Save the sale detail models
-                sql.SaveData("dbo.spSaleDetail_Insert", item, "TRMData");
+                try
+                {
+                    sql.StartTransaction("TRMData");
+
+                    // Save the sale model
+                    sql.SaveDataInTransaction<SaleDBModel>("dbo.spSale_Insert", saleDB);
+
+                    // Get the ID from the detail model
+                    saleDB.Id = sql.LoadDataInTransaction<int, dynamic>("dbo.spSale_Lookup", new { saleDB.CashierId, saleDB.SaleDate }).FirstOrDefault();
+
+                    // Finish filling in the sale detai models
+                    foreach (var item in details)
+                    {
+                        item.SaleId = saleDB.Id;
+                        // Save the sale detail models
+                        sql.SaveDataInTransaction("dbo.spSaleDetail_Insert", item);
+                    }
+
+                    sql.CommitTransation();
+                }
+                catch
+                {
+                    sql.RollbackTransaction();
+                    throw;
+                }
             }
         }
     }
