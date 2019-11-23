@@ -10,6 +10,8 @@ using TRMDesktopUI.Library.Api;
 using TRMDesktopUI.Library.Helpers;
 using AutoMapper;
 using TRMDesktopUI.Models;
+using System.Dynamic;
+using System.Windows;
 
 namespace TRMDesktopUI.ViewModels
 {
@@ -18,20 +20,48 @@ namespace TRMDesktopUI.ViewModels
         IProductEndpoint _productEndpoint;
         IConfigHelper _configHelper;
         ISaleEndPoint _saleEndPoint;
-        IMapper _mapper; 
+        IMapper _mapper;
+        
+        private readonly StatusInfoViewModel _status;
+        private readonly IWindowManager _window;
 
-        public SalesViewModel(IProductEndpoint productEndpoint, IConfigHelper configHelper, ISaleEndPoint saleEndPoint, IMapper mapper)
+        public SalesViewModel(IProductEndpoint productEndpoint, IConfigHelper configHelper, ISaleEndPoint saleEndPoint, IMapper mapper, StatusInfoViewModel status, IWindowManager window)
         {
             _productEndpoint = productEndpoint;
             _configHelper = configHelper;
             _saleEndPoint = saleEndPoint;
             _mapper = mapper;
+            _status = status;
+            _window = window;
         }
 
         protected override async void OnViewLoaded(object view)
         {
             base.OnViewLoaded(view);
-            await LoadProducts();
+            try
+            {
+                await LoadProducts();
+            }
+            catch (Exception ex)
+            {
+                dynamic settings = new ExpandoObject();
+                settings.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                settings.ResizeMode = ResizeMode.NoResize;
+                settings.Title = "System Error";
+
+                if(ex.Message == "Unauthorized")
+                {
+                    _status.UpdateMessage("Unauthorized Access", "You do not have permission to interact with the Sale Form.");
+                    _window.ShowDialog(_status, null, settings);
+                }
+                else
+                {
+                    _status.UpdateMessage("Fatal Exception", ex.Message);
+                    _window.ShowDialog(_status, null, settings);
+                }
+                
+                TryClose();
+            }
         }
 
         public async Task LoadProducts()
