@@ -5,10 +5,13 @@
     <UserSecretsId>aspnet-TRMApi-D99D78E1-2371-4C6D-A05E-EBAA96110EA5</UserSecretsId>
   </PropertyGroup>
 
+<<<<<<< HEAD
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
 
+=======
+>>>>>>> 05d898435b90535d4202259db2bbeff96e7176b1
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="3.0.0" />

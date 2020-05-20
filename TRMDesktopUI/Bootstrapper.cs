@@ -8,6 +8,11 @@ using System.Windows;
 using System.Windows.Controls;
 using TRMDesktopUI.Helpers;
 using TRMDesktopUI.ViewModels;
+using TRMDesktopUI.Library.Api;
+using TRMDesktopUI.Library.Models;
+using TRMDesktopUI.Library.Helpers;
+using AutoMapper;
+using TRMDesktopUI.Models;
 
 namespace TRMDesktopUI
 {
@@ -25,14 +30,34 @@ namespace TRMDesktopUI
             "PasswordChanged");
         }
 
+        private static IMapper ConfigureAutomapper()
+        {
+            var config = new MapperConfiguration(cfg =>
+            {
+                cfg.CreateMap<ProductModel, ProductDisplayModel>();
+                cfg.CreateMap<CartItemModel, CartItemDisplayModel>();
+            });
+
+            var mapper = config.CreateMapper();
+
+            return mapper;
+        }
+
         protected override void Configure()
         {
-            _container.Instance(_container);
+            _container.Instance(ConfigureAutomapper());
+
+            _container.Instance(_container)
+                .PerRequest<IProductEndpoint, ProductEndpoint>()
+                .PerRequest<IUserEndPoint, UserEndPoint>()
+                .PerRequest<ISaleEndPoint, SaleEndPoint>();
 
             _container
                 .Singleton<IWindowManager, WindowManager>()
                 .Singleton<IEventAggregator, EventAggregator>()
-                .Singleton<IAPIHelper, APIHelper>();
+                .Singleton<IAPIHelper, APIHelper>()
+                .Singleton<IConfigHelper, ConfigHelper>()
+                .Singleton<ILoggedInUserModel, LoggedInUserModel>();
 
             GetType().Assembly.GetTypes()
                 .Where(type => type.IsClass)
